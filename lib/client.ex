@@ -42,9 +42,27 @@ defmodule LXD.Client do
   end
 
 
-  defp handle_response({:ok, %HTTPoison.Response{status_code: code, body: body}}) do
+  defp handle_response({:ok, %HTTPoison.Response{status_code: code, body: body, headers: headers}}) do
     Logger.debug("[Client] Request response with #{code}")
-    Poison.decode(body)
+
+    headers
+    |> Map.new
+    |> Map.fetch("Content-Type")
+    |> case do
+      {:ok, value} ->
+        Logger.debug("[Client] Content-type: #{value}")
+        case value do
+          "application/json" ->
+            case Poison.decode(body) do
+              {:ok, json} -> {:ok, value, json}
+              {:error, reason} -> {:error, reason}
+            end
+          _ ->
+            {:ok, value, body}
+        end
+      :error ->
+        {:ok, :unknown, body}
+    end
   end
 
   defp handle_response({:error, %HTTPoison.Error{id: _id, reason: reason}}) do

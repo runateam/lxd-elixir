@@ -1,18 +1,28 @@
 defmodule LXD.Utils do
 
-  def handle_lxd_response({:ok, response}, opts \\ []) do
-    raw = opts[:raw] || false
-    type = opts[:type] || :sync
-    fct = opts[:fct] || fn d -> d end
+  def handle_lxd_response(a, opts \\ [])
+  def handle_lxd_response({:ok, mime, response}, opts) do
+    raw = arg(opts, :raw, false)
+    type = arg(opts, :type, :sync)
+    fct = arg(opts, :fct, fn d -> d end)
 
-    case raw do
-      true -> {:ok, response}
-      false ->
+    case mime do
+      "application/json" ->
+        case raw do
+          true -> {:ok, response}
+          false ->
+            {:ok, response}
+            |> handle_type(type)
+            |> handle_data(fct)
+        end
+      "application/octet-stream" ->
         {:ok, response}
-        |> handle_type(type)
         |> handle_data(fct)
+      _ ->
+        {:ok, response}
     end
   end
+  def handle_lxd_response({:error, _} = o, _opts), do: o
 
   def handle_type({:ok, response}, :sync) do
     parse_response_type(response)

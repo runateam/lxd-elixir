@@ -147,4 +147,19 @@ defmodule LXD.Container do
     |> Utils.wait_operation(wait, timeout, raw)
   end
 
+  def logs(name, opts \\ []) do
+    raw = Utils.arg(opts, :raw, false)
+    "/containers/" <> name <> "/logs"
+    |> Client.get
+    |> Utils.handle_lxd_response(raw: raw, type: :sync)
+  end
+
+  def log(name, filename, opts \\ []) do
+    raw = Utils.arg(opts, :raw, false)
+    fct = fn logs -> logs |> String.split("\n") |> Enum.map(&String.trim&1) end
+    "/containers/" <> name <> "/logs/" <> filename
+    |> Client.get
+    |> Utils.handle_lxd_response(raw: raw, type: :sync, fct: fct)
+  end
+
 end
