@@ -26,7 +26,7 @@ defmodule LXD.Storage do
     |> Utils.handle_lxd_response(raw: raw, type: :sync)
   end
 
-  def get(name, opts \\ []) do
+  def info(name, opts \\ []) do
     raw = opts[:raw] || false
     Client.get("/storage-pools/" <> name)
     |> Utils.handle_lxd_response(raw: raw, type: :sync)

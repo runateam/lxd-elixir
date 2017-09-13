@@ -8,7 +8,7 @@ defmodule LXD.Operations do
     |> Utils.handle_lxd_response(raw: raw,  type: :sync)
   end
 
-  def get(uuid, opts \\ []) do
+  def info(uuid, opts \\ []) do
     raw = opts[:raw] || false
     Client.get("/operations/" <> uuid)
     |> Utils.handle_lxd_response(raw: raw,  type: :sync,)

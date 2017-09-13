@@ -20,13 +20,13 @@ defmodule LXD.Profiles do
     |> Utils.handle_lxd_response(raw: raw, type: :sync, fct: fct)
   end
 
-  def new(profile, opts \\ []) do
+  def create(profile, opts \\ []) do
     raw = opts[:raw] || false
     Client.post("/profiles", Poison.encode!(profile))
     |> Utils.handle_lxd_response(raw: raw, type: :sync)
   end
 
-  def get(name, opts \\ []) do
+  def info(name, opts \\ []) do
     raw = opts[:raw] || false
     Client.get("/profiles/" <> name)
     |> Utils.handle_lxd_response(raw: raw, type: :sync)
