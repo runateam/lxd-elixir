@@ -43,6 +43,30 @@ defmodule LXD.Utils do
   def handle_data({:error, _} = o, _fct), do: o
 
 
+  def wait_operation(response, wait \\ true, timeout \\ nil, raw \\ false) do
+    case wait do
+      false ->
+        response
+      true ->
+        case response do
+          {:ok, {_op, data}} ->
+            case Map.fetch(data, "id") do
+              {:ok, value} ->
+                LXD.Operation.wait(value, raw: raw, timeout: timeout)
+              :error -> response
+            end
+          _ -> response
+        end
+    end
+  end
+
+  def arg(args, key, default \\ nil) do
+    case List.keyfind(args, key, 0, nil) do
+      {_, value } -> value
+      _ -> default
+    end
+  end
+
   defp parse_response_type(response) do
     case response["type"] do
       "sync" ->

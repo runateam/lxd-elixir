@@ -1,10 +1,10 @@
-defmodule LXD.Profiles do
+defmodule LXD.Profile do
   alias LXD.Client
   alias LXD.Utils
 
   def all(opts \\ []) do
-    raw = opts[:raw] || false
-    as_url = opts[:as_url] || false
+    raw = Utils.arg(opts, :raw, false)
+    as_url = Utils.arg(opts, :as_url, false)
 
     fct = fn data ->
       data
@@ -16,43 +16,51 @@ defmodule LXD.Profiles do
       end)
     end
 
-    Client.get("/profiles")
+    "/profiles"
+    |> Client.get
     |> Utils.handle_lxd_response(raw: raw, type: :sync, fct: fct)
   end
 
   def create(profile, opts \\ []) do
-    raw = opts[:raw] || false
-    Client.post("/profiles", Poison.encode!(profile))
+    raw = Utils.arg(opts, :raw, false)
+    "/profiles"
+    |> Client.post(Poison.encode!(profile))
     |> Utils.handle_lxd_response(raw: raw, type: :sync)
   end
 
   def info(name, opts \\ []) do
-    raw = opts[:raw] || false
-    Client.get("/profiles/" <> name)
+    raw = Utils.arg(opts, :raw, false)
+    "/profiles/" <> name
+    |> Client.get
     |> Utils.handle_lxd_response(raw: raw, type: :sync)
   end
 
-  def replace(name, informations, opts \\ []) do
-    raw = opts[:raw] || false
-    Client.put("/profiles/" <> name, Poison.encode!(informations))
+  def replace(name, configs, opts \\ []) do
+    raw = Utils.arg(opts, :raw, false)
+    "/profiles/" <> name
+    |> Client.put(Poison.encode!(configs))
     |> Utils.handle_lxd_response(raw: raw, type: :sync)
   end
 
-  def update(name, informations, opts \\ []) do
-    raw = opts[:raw] || false
-    Client.patch("/profiles/" <> name, Poison.encode!(informations))
+  def update(name, configs, opts \\ []) do
+    raw = Utils.arg(opts, :raw, false)
+    "/profiles/" <> name
+    |> Client.patch(Poison.encode!(configs))
     |> Utils.handle_lxd_response(raw: raw, type: :sync)
   end
 
   def rename(name, new_name, opts \\ []) do
-    raw = opts[:raw] || false
-    Client.post("/profiles/" <> name, Poison.encode!(%{"name" => new_name}))
+    raw = Utils.arg(opts, :raw, false)
+    "/profiles/" <> name
+    |> Client.post(Poison.encode!(%{"name" => new_name}))
     |> Utils.handle_lxd_response(raw: raw, type: :sync)
   end
 
   def delete(name, opts \\ []) do
-    raw = opts[:raw] || false
-    Client.delete("/profiles/" <> name)
+    raw = Utils.arg(opts, :raw, false)
+    "/profiles/" <> name
+    |> Client.delete
     |> Utils.handle_lxd_response(raw: raw, type: :sync)
   end
+
 end
