@@ -95,6 +95,18 @@ defmodule LXD.Container do
     |> Utils.handle_lxd_response(raw: raw, type: :sync)
   end
 
+  def status(name) do
+    response = state(name)
+    case response do
+      {:ok, body} ->
+        case Map.fetch(body, "status") do
+          {:ok, value} -> {:ok, value}
+          :error -> {:error, "Cannot find status in response"}
+        end
+      _ -> response
+    end
+  end
+
   def stop(name, opts \\ []) do
     state_change("stop", name, opts)
   end
