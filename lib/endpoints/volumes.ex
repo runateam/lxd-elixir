@@ -22,7 +22,7 @@ defmodule LXD.Volumes do
 
   def create(storage_name, configs, opts \\ []) do
     raw = opts[:raw] || false
-    Client.post("/storage-pools/" <> storage_name "/volumes", Poison.encode!(configs))
+    Client.post("/storage-pools/" <> storage_name <> "/volumes", Poison.encode!(configs))
     |> Utils.handle_lxd_response(raw: raw, type: :sync)
   end
 
