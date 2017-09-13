@@ -1,7 +1,8 @@
 defmodule LXD.Client do
   require Logger
 
-  @url "http+unix://" <> URI.encode_www_form(Application.get_env(:lxd, :socket))
+  @version Application.get_env(:lxd, :api_version)
+  @url "http+unix://" <> URI.encode_www_form(Application.get_env(:lxd, :socket)) <> @version
   @http_opts [{:recv_timeout, :infinity}]
 
   def get(endpoint, headers \\ []) do
@@ -12,7 +13,7 @@ defmodule LXD.Client do
   end
 
   def post(endpoint, data \\ "", headers \\ []) do
-    Logger.debug("[Client] POST #{endpoint}")
+    Logger.debug("[Client] POST #{endpoint} #{data}")
     @url <> endpoint
     |> HTTPoison.post(data, headers, @http_opts)
     |> handle_response
@@ -22,6 +23,20 @@ defmodule LXD.Client do
     Logger.debug("[Client] DELETE #{endpoint}")
     @url <> endpoint
     |> HTTPoison.delete(headers, @http_opts)
+    |> handle_response
+  end
+
+  def put(endpoint, data \\ "", headers \\ []) do
+    Logger.debug("[Client] PUT #{endpoint} #{data}")
+    @url <> endpoint
+    |> HTTPoison.put(data, headers, @http_opts)
+    |> handle_response
+  end
+
+  def patch(endpoint, data \\ "", headers \\ []) do
+    Logger.debug("[Client] PATCH #{endpoint} #{data}")
+    @url <> endpoint
+    |> HTTPoison.patch(data, headers, @http_opts)
     |> handle_response
   end
 

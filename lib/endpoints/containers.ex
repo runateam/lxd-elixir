@@ -2,8 +2,6 @@ defmodule LXD.Containers do
   alias LXD.Client
   alias LXD.Utils
 
-  @version Application.get_env(:lxd, :api_version)
-
   def all(opts \\ []) do
     raw = opts[:raw] || false
     as_url = opts[:as_url] || false
@@ -18,7 +16,7 @@ defmodule LXD.Containers do
       end)
     end
 
-    Client.get(@version <> "/containers")
+    Client.get("/containers")
     |> Utils.handle_lxd_response(raw: raw, type: :sync, fct: fct)
   end
 
@@ -27,7 +25,7 @@ defmodule LXD.Containers do
     wait = opts[:wait] || nil
     timeout = opts[:timeout] || nil
 
-    result = Client.post(@version <> "/containers", Poison.encode!(template))
+    result = Client.post("/containers", Poison.encode!(template))
     |> Utils.handle_lxd_response(raw: raw, type: :async)
 
     case wait do
