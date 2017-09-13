@@ -1,5 +1,4 @@
 defmodule LXD.Operations do
-  require Logger
   alias LXD.Client
   alias LXD.Utils
 
