@@ -182,7 +182,18 @@ defmodule LXD.Container.File do
 
           {:ok, filename}
         "directory" ->
-          {:ok, body}
+          dirname = path_in_container |> String.split("/") |> List.last
+          dirname = dir <> "/" <> dirname
+
+          case File.mkdir(dirname) do
+            :ok ->
+              body["metadata"]
+              |> Enum.each(fn one ->
+                get(name, path_in_container <> "/" <> one, dir: dirname)
+              end)
+            {:error, posix} ->
+              {:error, posix}
+          end
       end
     end
 
