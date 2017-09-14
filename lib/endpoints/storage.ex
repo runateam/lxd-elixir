@@ -23,31 +23,31 @@ defmodule LXD.Storage do
   def create(configs, opts \\ []) do
     "/storage-pools"
     |> Client.post(Poison.encode!(configs))
-    |> Utils.handle_lxd_response
+    |> Utils.handle_lxd_response(opts)
   end
 
   def info(name, opts \\ []) do
     "/storage-pools/" <> name
     |> Client.get
-    |> Utils.handle_lxd_response
+    |> Utils.handle_lxd_response(opts)
   end
 
   def replace(name, configs, opts \\ []) do
     "/storage-pools/" <> name
     |> Client.put(Poison.encode!(configs))
-    |> Utils.handle_lxd_response
+    |> Utils.handle_lxd_response(opts)
   end
 
   def update(name, configs, opts \\ []) do
     "/storage-pools/" <> name
     |> Client.patch(Poison.encode!(configs))
-    |> Utils.handle_lxd_response
+    |> Utils.handle_lxd_response(opts)
   end
 
   def delete(name, opts \\ []) do
     "/storage-pools/" <> name
     |> Client.delete
-    |> Utils.handle_lxd_response
+    |> Utils.handle_lxd_response(opts)
   end
 
 end

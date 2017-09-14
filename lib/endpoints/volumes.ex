@@ -23,7 +23,7 @@ defmodule LXD.Volume do
   def create(storage_name, configs, opts \\ []) do
     "/storage-pools/" <> storage_name <> "/volumes"
     |> Client.post(Poison.encode!(configs))
-    |> Utils.handle_lxd_response
+    |> Utils.handle_lxd_response(opts)
   end
 
 end

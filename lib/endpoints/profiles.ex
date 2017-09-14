@@ -23,37 +23,37 @@ defmodule LXD.Profile do
   def create(profile, opts \\ []) do
     "/profiles"
     |> Client.post(Poison.encode!(profile))
-    |> Utils.handle_lxd_response
+    |> Utils.handle_lxd_response(opts)
   end
 
   def info(name, opts \\ []) do
     "/profiles/" <> name
     |> Client.get
-    |> Utils.handle_lxd_response
+    |> Utils.handle_lxd_response(opts)
   end
 
   def replace(name, configs, opts \\ []) do
     "/profiles/" <> name
     |> Client.put(Poison.encode!(configs))
-    |> Utils.handle_lxd_response
+    |> Utils.handle_lxd_response(opts)
   end
 
   def update(name, configs, opts \\ []) do
     "/profiles/" <> name
     |> Client.patch(Poison.encode!(configs))
-    |> Utils.handle_lxd_response
+    |> Utils.handle_lxd_response(opts)
   end
 
   def rename(name, new_name, opts \\ []) do
     "/profiles/" <> name
     |> Client.post(Poison.encode!(%{"name" => new_name}))
-    |> Utils.handle_lxd_response
+    |> Utils.handle_lxd_response(opts)
   end
 
   def delete(name, opts \\ []) do
     "/profiles/" <> name
     |> Client.delete
-    |> Utils.handle_lxd_response
+    |> Utils.handle_lxd_response(opts)
   end
 
 end
