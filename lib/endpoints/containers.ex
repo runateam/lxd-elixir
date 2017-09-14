@@ -115,50 +115,80 @@ defmodule LXD.Container do
     |> Utils.handle_lxd_response(opts)
   end
 
-  def logs(name, opts \\ []) do
-    "/containers/" <> name <> "/logs"
-    |> Client.get
-    |> Utils.handle_lxd_response(opts)
-  end
-
-  def log(name, filename, opts \\ []) do
-    fct = fn logs -> logs |> String.split("\n") |> Enum.map(&String.trim&1) end
-    "/containers/" <> name <> "/logs/" <> filename
-    |> Client.get
-    |> Utils.handle_lxd_response(opts ++ [{:fct, fct}])
-  end
-
   def metadata(name, opts \\ []) do
     "/containers/" <> name <> "/metadata"
     |> Client.get
     |> Utils.handle_lxd_response(opts)
   end
 
-  defmodule Template do
+end
 
-    def all(container_name, opts \\ []) do
-      "/containers/" <> container_name <> "/metadata/templates"
-      |> Client.get
-      |> Utils.handle_lxd_response(opts)
-    end
 
-    def get(name, template, opts \\ []) do
-      "/containers/" <> name <> "/metadata/templates"
-      |> Client.get([], params: [{"path", template}])
-      |> Utils.handle_lxd_response(opts)
-    end
+defmodule LXD.Container.Template do
+  alias LXD.Utils
+  alias LXD.Client
 
+  def all(container_name, opts \\ []) do
+    "/containers/" <> container_name <> "/metadata/templates"
+    |> Client.get
+    |> Utils.handle_lxd_response(opts)
   end
 
+  def get(name, template, opts \\ []) do
+    "/containers/" <> name <> "/metadata/templates"
+    |> Client.get([], params: [{"path", template}])
+    |> Utils.handle_lxd_response(opts)
+  end
 
-  defmodule File do
+end
 
-    def file_get(name, path_in_container, opts \\ []) do
-      "/containers/" <> name <> "/files"
-      |> Client.get([], params: [{"path", path_in_container}])
-      |> Utils.handle_lxd_response(opts)
+
+defmodule LXD.Container.Log do
+  alias LXD.Utils
+  alias LXD.Client
+
+  def all(name, opts \\ []) do
+    "/containers/" <> name <> "/logs"
+    |> Client.get
+    |> Utils.handle_lxd_response(opts)
+  end
+
+  def get(name, filename, opts \\ []) do
+    fct = fn {:ok, _h, logs} -> logs |> String.split("\n") |> Enum.map(&String.trim&1) end
+    "/containers/" <> name <> "/logs/" <> filename
+    |> Client.get
+    |> Utils.handle_lxd_response(opts ++ [{:fct, fct}])
+  end
+
+end
+
+
+defmodule LXD.Container.File do
+  alias LXD.Utils
+  alias LXD.Client
+
+  def get(name, path_in_container, opts \\ []) do
+    dir = Utils.arg(opts, :dir, System.cwd)
+
+    fct = fn {:ok, headers, body} ->
+      case headers["x-lxd-type"] do
+        "file" ->
+          filename = Regex.run(~r/filename=(.+)/, headers["content-disposition"], capture: :all_but_first) |> List.first
+          filename = dir <> "/" <> filename
+
+          File.open(filename, [:write], fn(file) ->
+            IO.write(file, body)
+          end)
+
+          {:ok, filename}
+        "directory" ->
+          {:ok, body}
+      end
     end
 
+    "/containers/" <> name <> "/files"
+    |> Client.get([], params: [{"path", path_in_container}])
+    |> Utils.handle_lxd_response(opts ++ [{:fct, fct}])
   end
 
 end
