@@ -194,6 +194,7 @@ defmodule LXD.Container.File do
             {:error, posix} ->
               {:error, posix}
           end
+          dirname
       end
     end
 
