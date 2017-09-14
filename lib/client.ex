@@ -20,10 +20,10 @@ defmodule LXD.Client do
     |> handle_response
   end
 
-  def delete(endpoint, headers \\ @headers) do
+  def delete(endpoint, headers \\ @headers, opts \\ []) do
     Logger.debug("[Client] DELETE #{endpoint}")
     @url <> endpoint
-    |> HTTPoison.delete(headers, @http_opts)
+    |> HTTPoison.delete(headers, @http_opts ++ opts)
     |> handle_response
   end
 
