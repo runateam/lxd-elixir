@@ -3,29 +3,26 @@ defmodule LXD.Operation do
   alias LXD.Utils
 
   def all(opts \\ []) do
-    raw = Utils.arg(opts, :raw, false)
     "/operations"
     |> Client.get
-    |> Utils.handle_lxd_response(raw: raw,  type: :sync)
+    |> Utils.handle_lxd_response(opts)
   end
 
   def info(uuid, opts \\ []) do
-    raw = Utils.arg(opts, :raw, false)
     "/operations/" <> uuid
     |> Client.get
-    |> Utils.handle_lxd_response(raw: raw,  type: :sync,)
+    |> Utils.handle_lxd_response(opts)
   end
 
   def delete(uuid, opts \\ []) do
-    raw = Utils.arg(opts, :raw, false)
     "/operations/" <> uuid
     |> Client.delete
-    |> Utils.handle_lxd_response(raw: raw,  type: :sync)
+    |> Utils.handle_lxd_response(opts)
   end
 
   def wait(uuid, opts \\ []) do
-    raw = Utils.arg(opts, :raw, false)
     timeout = Utils.arg(opts, :timeout, 0)
+    uuid = uuid |> String.split("/") |> List.last
 
     timeout = case timeout do
       0 -> ""
@@ -34,6 +31,6 @@ defmodule LXD.Operation do
 
     "/operations/" <> uuid <> "/wait" <> timeout
     |> Client.get
-    |> Utils.handle_lxd_response(raw: raw,  type: :sync)
+    |> Utils.handle_lxd_response(opts)
   end
 end

@@ -6,10 +6,10 @@ defmodule LXD.Client do
   @http_opts [{:recv_timeout, :infinity}]
   @headers %{"Content-Type" => "application/json"}
 
-  def get(endpoint, headers \\ @headers) do
+  def get(endpoint, headers \\ @headers, opts \\ []) do
     Logger.debug("[Client] GET #{endpoint}")
     @url <> endpoint
-    |> HTTPoison.get(headers, @http_opts)
+    |> HTTPoison.get(headers, @http_opts ++ opts)
     |> handle_response
   end
 
@@ -44,25 +44,12 @@ defmodule LXD.Client do
 
   defp handle_response({:ok, %HTTPoison.Response{status_code: code, body: body, headers: headers}}) do
     Logger.debug("[Client] Request response with #{code}")
-
-    headers
+    headers = headers
+    |> Enum.map(fn {key, value} ->
+      {key |> String.downcase, value}
+    end)
     |> Map.new
-    |> Map.fetch("Content-Type")
-    |> case do
-      {:ok, value} ->
-        Logger.debug("[Client] Content-type: #{value}")
-        case value do
-          "application/json" ->
-            case Poison.decode(body) do
-              {:ok, json} -> {:ok, value, json}
-              {:error, reason} -> {:error, reason}
-            end
-          _ ->
-            {:ok, value, body}
-        end
-      :error ->
-        {:ok, :unknown, body}
-    end
+    {:ok, headers, body}
   end
 
   defp handle_response({:error, %HTTPoison.Error{id: _id, reason: reason}}) do

@@ -1,94 +1,76 @@
 defmodule LXD.Utils do
 
   def handle_lxd_response(a, opts \\ [])
-  def handle_lxd_response({:ok, mime, response}, opts) do
-    raw = arg(opts, :raw, false)
-    type = arg(opts, :type, :sync)
-    fct = arg(opts, :fct, fn d -> d end)
+  def handle_lxd_response({:ok, headers, body}, opts) do
+    fct = arg(opts, :fct, fn({:ok, _h, b}) -> {:ok, b} end)
+    wait = arg(opts, :wait, true)
+    timeout = arg(opts, :timeout, 0)
 
-    case mime do
-      "application/json" ->
-        case raw do
-          true -> {:ok, response}
-          false ->
-            {:ok, response}
-            |> handle_type(type)
-            |> handle_data(fct)
-        end
-      "application/octet-stream" ->
-        {:ok, response}
-        |> handle_data(fct)
-      _ ->
-        {:ok, response}
-    end
+    {:ok, headers, body}
+    |> parse_body
+    |> IO.inspect
+    |> wait_operation(wait, timeout)
+    |> apply_fct(fct)
   end
   def handle_lxd_response({:error, _} = o, _opts), do: o
 
-  def handle_type({:ok, response}, :sync) do
-    parse_response_type(response)
-    |> case do
-      {:sync, _, data} -> {:ok, data}
-      {:error, reason, data} -> {:error, {reason, data}}
-      bad -> {:error, bad}
+
+  defp parse_body({:ok, headers, body}) do
+    case Map.fetch(headers, "content-type") do
+      {:ok, value} ->
+        case value do
+          "application/json" ->
+            case Poison.decode(body) do
+              {:ok, value} ->
+                {:ok, headers, value}
+              {:error, reason} ->
+                {:error, reason}
+            end
+          _ ->
+            {:ok, headers, body}
+        end
+      :error ->
+        {:ok, headers, body}
     end
   end
-  def handle_type({:error, _} = o, :sync), do: o
+  defp parse_body({:error, _} = o), do: o
 
-  def handle_type({:ok, response}, :async) do
-    parse_response_type(response)
-    |> case do
-      {:async, _, operation, data} -> {:ok, {operation, data}}
-      {:error, reason, data} -> {:error, {reason, data}}
-      bad -> {:error, bad}
-    end
+
+  defp apply_fct({:ok, headers, body}, fct) do
+    fct.({:ok, headers, body})
   end
-  def handle_type({:error, _} = o, :async), do: o
-
-  def handle_data({:ok, {operation, data}}, fct) do
-    {:ok, {operation, fct.(data)}}
+  defp apply_fct({:ok, body}, fct) do
+    fct.({:ok, %{}, body})
   end
-  def handle_data({:ok, data}, fct) do
-    {:ok, fct.(data)}
-  end
-  def handle_data({:error, _} = o, _fct), do: o
+  defp apply_fct({:error, _} = o, _fct), do: o
 
 
-  def wait_operation(response, wait \\ true, timeout \\ nil, raw \\ false) do
+  defp wait_operation(a, wait \\ true, timeout \\ nil)
+  defp wait_operation({:ok, headers, body}, wait, timeout) do
     case wait do
       false ->
-        response
+        {:ok, headers, body}
       true ->
-        case response do
-          {:ok, {_op, data}} ->
-            case Map.fetch(data, "id") do
-              {:ok, value} ->
-                LXD.Operation.wait(value, raw: raw, timeout: timeout)
-              :error -> response
+        case Map.fetch(body, "operation") do
+          {:ok, value} ->
+            case String.length(value) do
+              0 ->
+                {:ok, headers, body}
+              _ ->
+                LXD.Operation.wait(value, timeout: timeout)
             end
-          _ -> response
+          :error ->
+            {:ok, headers, body}
         end
     end
   end
+  defp wait_operation({:error, _} = o, _wait, _timeout), do: o
+
 
   def arg(args, key, default \\ nil) do
     case List.keyfind(args, key, 0, nil) do
       {_, value } -> value
       _ -> default
-    end
-  end
-
-  defp parse_response_type(response) do
-    case response["type"] do
-      "sync" ->
-        {:sync, response["status"], response["metadata"]}
-      "async" ->
-        {:async, response["status"], response["operation"], response["metadata"]}
-      "error" ->
-        metadata = case Map.fetch(response, "metadata") do
-          {:ok, value} -> value
-          :error -> %{}
-        end
-        {:error, response["error"], metadata}
     end
   end
 

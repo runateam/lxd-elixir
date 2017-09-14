@@ -3,11 +3,10 @@ defmodule LXD.Volume do
   alias LXD.Utils
 
   def all(storage_name, opts \\ []) do
-    raw = Utils.arg(opts, :raw, false)
     as_url = Utils.arg(opts, :as_url, false)
 
-    fct = fn data ->
-      data
+    fct = fn {:ok, _headers, body} ->
+      body["metadata"]
       |> Enum.map(fn volume ->
         case as_url do
           true -> volume
@@ -18,14 +17,13 @@ defmodule LXD.Volume do
 
     "/storage-pools/" <> storage_name <> "/volumes"
     |> Client.get
-    |> Utils.handle_lxd_response(raw: raw, type: :sync, fct: fct)
+    |> Utils.handle_lxd_response(opts ++ [{:fct, fct}])
   end
 
   def create(storage_name, configs, opts \\ []) do
-    raw = Utils.arg(opts, :raw, false)
     "/storage-pools/" <> storage_name <> "/volumes"
     |> Client.post(Poison.encode!(configs))
-    |> Utils.handle_lxd_response(raw: raw, type: :sync)
+    |> Utils.handle_lxd_response
   end
 
 end
