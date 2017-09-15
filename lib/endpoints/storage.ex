@@ -10,7 +10,7 @@ defmodule LXD.Storage do
       |> Enum.map(fn storage ->
         case as_url do
           true -> storage
-          false -> storage |> String.split("/") |> List.last
+          false -> storage |> Path.basename
         end
       end)
     end
@@ -64,7 +64,7 @@ defmodule LXD.Storage.Volume do
       |> Enum.map(fn volume ->
         case as_url do
           true -> volume
-          false -> volume |> String.split("/") |> List.last
+          false -> volume |> Path.basename
         end
       end)
     end

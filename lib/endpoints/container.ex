@@ -10,7 +10,7 @@ defmodule LXD.Container do
       |> Enum.map(fn container ->
         case as_url do
           true -> container
-          false -> container |> String.split("/") |> List.last
+          false -> container |> Path.basename
         end
       end)
     end

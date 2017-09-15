@@ -10,7 +10,7 @@ defmodule LXD.Profile do
       |> Enum.map(fn profile ->
         case as_url do
           true -> profile
-          false -> profile |> String.split("/") |> List.last
+          false -> profile |> Path.basename
         end
       end)
     end

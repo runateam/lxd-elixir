@@ -79,13 +79,13 @@ be found at [https://hexdocs.pm/lxd](https://hexdocs.pm/lxd).
 - [ ] events
     - [ ] GET
 - [ ] images
-    - [ ] GET
+    - [x] GET all
     - [ ] POST
     - [ ] images/<fingerprint>
-        - [ ] GET
-        - [ ] PUT
-        - [ ] PATCH
-        - [ ] DELETE
+        - [x] GET info
+        - [x] PUT replace
+        - [x] PATCH update
+        - [x] DELETE remove
         - [ ] export
             - [ ] GET
         - [ ] refresh
