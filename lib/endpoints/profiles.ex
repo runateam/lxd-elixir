@@ -50,7 +50,7 @@ defmodule LXD.Profile do
     |> Utils.handle_lxd_response(opts)
   end
 
-  def delete(name, opts \\ []) do
+  def remove(name, opts \\ []) do
     "/profiles/" <> name
     |> Client.delete
     |> Utils.handle_lxd_response(opts)

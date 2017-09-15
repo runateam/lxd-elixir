@@ -50,7 +50,7 @@ defmodule LXD.Container do
     |> Utils.handle_lxd_response(opts)
   end
 
-  def delete(name, opts \\ []) do
+  def remove(name, opts \\ []) do
     "/containers/" <> name
     |> Client.delete
     |> Utils.handle_lxd_response(opts)
@@ -236,7 +236,7 @@ defmodule LXD.Container.File do
     end
   end
 
-  def delete(name, path_in_container, opts \\ []) do
+  def remove(name, path_in_container, opts \\ []) do
     "/containers/" <> name <> "/files"
     |> Client.delete([], params: [{"path", path_in_container}])
     |> Utils.handle_lxd_response(opts)

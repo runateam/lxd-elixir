@@ -14,7 +14,7 @@ defmodule LXD.Operation do
     |> Utils.handle_lxd_response(opts)
   end
 
-  def delete(uuid, opts \\ []) do
+  def remove(uuid, opts \\ []) do
     "/operations/" <> uuid
     |> Client.delete
     |> Utils.handle_lxd_response(opts)
