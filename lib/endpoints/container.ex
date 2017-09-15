@@ -6,13 +6,14 @@ defmodule LXD.Container do
     as_url = Utils.arg(opts, :as_url, false)
 
     fct = fn {:ok, _headers, body} ->
-      body["metadata"]
+      ls = body["metadata"]
       |> Enum.map(fn container ->
         case as_url do
           true -> container
           false -> container |> Path.basename
         end
       end)
+      {:ok, ls}
     end
 
     "/containers"

@@ -6,13 +6,14 @@ defmodule LXD.Profile do
     as_url = Utils.arg(opts, :as_url, false)
 
     fct = fn {:ok, _headers, body} ->
-      body["metadata"]
+      ls = body["metadata"]
       |> Enum.map(fn profile ->
         case as_url do
           true -> profile
           false -> profile |> Path.basename
         end
       end)
+      {:ok, ls}
     end
 
     "/profiles"

@@ -6,13 +6,14 @@ defmodule LXD.Storage do
     as_url = Utils.arg(opts, :as_url, false)
 
     fct = fn {:ok, _headers, body} ->
-      body["metadata"]
+      ls = body["metadata"]
       |> Enum.map(fn storage ->
         case as_url do
           true -> storage
           false -> storage |> Path.basename
         end
       end)
+      {:ok, ls}
     end
 
     "/storage-pools"
@@ -60,13 +61,14 @@ defmodule LXD.Storage.Volume do
     as_url = Utils.arg(opts, :as_url, false)
 
     fct = fn {:ok, _headers, body} ->
-      body["metadata"]
+      ls = body["metadata"]
       |> Enum.map(fn volume ->
         case as_url do
           true -> volume
           false -> volume |> Path.basename
         end
       end)
+      {:ok, ls}
     end
 
     "/storage-pools/" <> storage_name <> "/volumes"

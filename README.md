@@ -92,15 +92,15 @@ be found at [https://hexdocs.pm/lxd](https://hexdocs.pm/lxd).
             - [ ] POST
         - [ ] secret
             - [ ] POST
-    - [ ] aliases
-        - [ ] GET
-        - [ ] POST
-        - [ ] aliases/<name>
-            - [ ] GET
-            - [ ] PUT
-            - [ ] PATCH
-            - [ ] POST
-            - [ ] DELETE
+    - [x] aliases
+        - [x] GET all
+        - [x] POST create
+        - [x] aliases/<name>
+            - [x] GET info
+            - [x] PUT replace
+            - [x] PATCH update
+            - [x] POST rename
+            - [x] DELETE remove
 - [ ] networks
     - [ ] GET
     - [ ] POST
