@@ -101,15 +101,15 @@ be found at [https://hexdocs.pm/lxd](https://hexdocs.pm/lxd).
             - [x] PATCH update
             - [x] POST rename
             - [x] DELETE remove
-- [ ] networks
-    - [ ] GET
-    - [ ] POST
-    - [ ] networks/<name>
-        - [ ] GET
-        - [ ] PUT
-        - [ ] PATCH
-        - [ ] POST
-        - [ ] DELETE
+- [x] networks
+    - [x] GET all
+    - [x] POST create
+    - [x] networks/<name>
+        - [x] GET info
+        - [x] PUT replace
+        - [x] PATCH update
+        - [x] POST rename
+        - [x] DELETE remove
 - [ ] operations
     - [x] GET all
     - [ ] operations/<uuid>
