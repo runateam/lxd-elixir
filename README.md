@@ -36,21 +36,21 @@ be found at [https://hexdocs.pm/lxd](https://hexdocs.pm/lxd).
         - [ ] PATCH
         - [ ] DELETE
 - [ ] containers
-    - [ ] GET
-    - [ ] POST
+    - [x] GET all
+    - [x] POST create
     - [ ] containers/<name>
-        - [ ] GET
-        - [ ] PUT
-        - [ ] PATCH
-        - [ ] POST rename
+        - [x] GET info
+        - [x] PUT replace
+        - [x] PATCH update
+        - [x] POST rename
         - [ ] POST migrate
-        - [ ] DELETE
-        - [ ] exec
-            - [ ] POST
+        - [x] DELETE
+        - [x] exec
+            - [x] POST exec (not supporting all features)
         - [x] files
-            - [x] GET
-            - [x] POST
-            - [x] DELETE
+            - [x] GET get
+            - [x] POST put
+            - [x] DELETE remove
         - [ ] snapshots
             - [x] GET all
             - [x] POST create
@@ -65,14 +65,14 @@ be found at [https://hexdocs.pm/lxd](https://hexdocs.pm/lxd).
         - [ ] logs
             - [x] GET all
             - [ ] logs/<logfile>
-                - [ ] GET
+                - [x] GET get
                 - [ ] DELETE
         - [ ] metadata
-            - [ ] GET
+            - [x] GET metadata
             - [ ] PUT
             - [ ] metadata/templates
-                - [ ] GET
-                - [ ] GET(?path)
+                - [x] GET all
+                - [x] GET(?path) get
                 - [ ] POST(?path)
                 - [ ] PUT(?path)
                 - [ ] DELETE(?path)
@@ -111,34 +111,34 @@ be found at [https://hexdocs.pm/lxd](https://hexdocs.pm/lxd).
         - [ ] POST
         - [ ] DELETE
 - [ ] operations
-    - [ ] GET
+    - [x] GET all
     - [ ] operations/<uuid>
-        - [ ] GET
-        - [ ] DELETE
-        - [ ] wait
-            - [ ] GET
+        - [x] GET info
+        - [x] DELETE remove
+        - [x] wait
+            - [x] GET wait
         - [ ] websocket
             - [ ] GET
-- [ ] profiles
-    - [ ] GET
-    - [ ] POST
-    - [ ] profiles/<name>
-        - [ ] GET
-        - [ ] PUT
-        - [ ] PATCH
-        - [ ] POST
-        - [ ] DELETE
+- [x] profiles
+    - [x] GET all
+    - [x] POST create
+    - [x] profiles/<name>
+        - [x] GET info
+        - [x] PUT replace
+        - [x] PATCH update
+        - [x] POST rename
+        - [x] DELETE remove
 - [ ] storage-pools
-    - [ ] GET
-    - [ ] POST
+    - [x] GET all
+    - [x] POST create
     - [ ] storage-pools/<name>
-        - [ ] GET
-        - [ ] PUT
-        - [ ] PATCH
-        - [ ] DELETE
-        - [ ] volumes
-            - [ ] GET
-            - [ ] POST
+        - [x] GET info
+        - [x] PUT replace
+        - [x] PATCH update
+        - [x] DELETE remove
+        - [x] volumes
+            - [x] GET all
+            - [x] POST create
         - [ ] volumes/<type>/<name>
             - [ ] GET
             - [ ] PUT
