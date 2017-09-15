@@ -174,7 +174,7 @@ defmodule LXD.Container.File do
       case headers["x-lxd-type"] do
         "file" ->
           filename = Regex.run(~r/filename=(.+)/, headers["content-disposition"], capture: :all_but_first) |> List.first
-          filename = dir <> "/" <> filename
+          filename = [dir, filename] |> Path.join
 
           File.open(filename, [:write], fn(file) ->
             IO.write(file, body)
@@ -182,14 +182,14 @@ defmodule LXD.Container.File do
 
           {:ok, filename}
         "directory" ->
-          dirname = path_in_container |> String.split("/") |> List.last
-          dirname = dir <> "/" <> dirname
+          dirname = path_in_container |> Path.basename
+          dirname = [dir, dirname] |> Path.join
 
           case File.mkdir(dirname) do
             :ok ->
               body["metadata"]
               |> Enum.each(fn one ->
-                get(name, path_in_container <> "/" <> one, dir: dirname)
+                get(name, [path_in_container, one] |> Path.join, dir: dirname)
               end)
             {:error, posix} ->
               {:error, posix}
@@ -201,6 +201,39 @@ defmodule LXD.Container.File do
     "/containers/" <> name <> "/files"
     |> Client.get([], params: [{"path", path_in_container}])
     |> Utils.handle_lxd_response(opts ++ [{:fct, fct}])
+  end
+
+  def put(name, path_file, path_in_container, opts \\ []) do
+    append = Utils.arg(opts, :append, false)
+
+    case File.exists?(path_file) do
+      true ->
+        {type, data} = case File.dir?(path_file) do
+          true ->
+            {"directory", ""}
+          false ->
+            case File.read(path_file) do
+              {:ok, binary} ->
+                {"file", binary}
+              {:error, posix} ->
+                {:error, "Failed to read file #{path_file} (#{:file.format_error(posix)})"}
+            end
+        end
+
+        case type do
+          :error ->
+            {:error, data}
+          _ ->
+            headers = [{"x-lxd-type", type}]
+            headers = [{"x-lxd-write", if(append, do: "append", else: "overwrite")} | headers ]
+
+            "/containers/" <> name <> "/files"
+            |> Client.post(data, headers, params: [{"path", path_in_container}])
+            |> Utils.handle_lxd_response(opts)
+        end
+      false ->
+        {:error, "File doesn't exist"}
+    end
   end
 
   def delete(name, path_in_container, opts \\ []) do

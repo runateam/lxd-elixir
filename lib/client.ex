@@ -13,10 +13,10 @@ defmodule LXD.Client do
     |> handle_response
   end
 
-  def post(endpoint, data \\ "", headers \\ @headers) do
+  def post(endpoint, data \\ "", headers \\ @headers, opts \\ []) do
     Logger.debug("[Client] POST #{endpoint} #{data}")
     @url <> endpoint
-    |> HTTPoison.post(data, headers, @http_opts)
+    |> HTTPoison.post(data, headers, @http_opts ++ opts)
     |> handle_response
   end
 
@@ -27,17 +27,17 @@ defmodule LXD.Client do
     |> handle_response
   end
 
-  def put(endpoint, data \\ "", headers \\ @headers) do
+  def put(endpoint, data \\ "", headers \\ @headers, opts \\ []) do
     Logger.debug("[Client] PUT #{endpoint} #{data}")
     @url <> endpoint
-    |> HTTPoison.put(data, headers, @http_opts)
+    |> HTTPoison.put(data, headers, @http_opts ++ opts)
     |> handle_response
   end
 
-  def patch(endpoint, data \\ "", headers \\ @headers) do
+  def patch(endpoint, data \\ "", headers \\ @headers, opts \\ []) do
     Logger.debug("[Client] PATCH #{endpoint} #{data}")
     @url <> endpoint
-    |> HTTPoison.patch(data, headers, @http_opts)
+    |> HTTPoison.patch(data, headers, @http_opts ++ opts)
     |> handle_response
   end
 
