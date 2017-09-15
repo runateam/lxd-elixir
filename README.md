@@ -30,7 +30,7 @@ be found at [https://hexdocs.pm/lxd](https://hexdocs.pm/lxd).
 - [ ] certificates
     - [ ] GET
     - [ ] POST
-    - [ ] certificates/<fingerprint>
+    - [ ] certificates/\<fingerprint\>
         - [ ] GET
         - [ ] PUT
         - [ ] PATCH
@@ -38,7 +38,7 @@ be found at [https://hexdocs.pm/lxd](https://hexdocs.pm/lxd).
 - [ ] containers
     - [x] GET all
     - [x] POST create
-    - [ ] containers/<name>
+    - [ ] containers/\<name\>
         - [x] GET info
         - [x] PUT replace
         - [x] PATCH update
@@ -54,7 +54,7 @@ be found at [https://hexdocs.pm/lxd](https://hexdocs.pm/lxd).
         - [ ] snapshots
             - [x] GET all
             - [x] POST create
-            - [ ] snapshots/<name>
+            - [ ] snapshots/\<name\>
                 - [x] GET get
                 - [x] POST rename
                 - [ ] POST migrate
@@ -64,7 +64,7 @@ be found at [https://hexdocs.pm/lxd](https://hexdocs.pm/lxd).
             - [x] POST set_state, start, stop, restart, freeze, unfreeze
         - [ ] logs
             - [x] GET all
-            - [ ] logs/<logfile>
+            - [ ] logs/\<logfile\>
                 - [x] GET get
                 - [ ] DELETE
         - [ ] metadata
@@ -81,7 +81,7 @@ be found at [https://hexdocs.pm/lxd](https://hexdocs.pm/lxd).
 - [ ] images
     - [x] GET all
     - [ ] POST
-    - [ ] images/<fingerprint>
+    - [ ] images/\<fingerprint\>
         - [x] GET info
         - [x] PUT replace
         - [x] PATCH update
@@ -95,7 +95,7 @@ be found at [https://hexdocs.pm/lxd](https://hexdocs.pm/lxd).
     - [x] aliases
         - [x] GET all
         - [x] POST create
-        - [x] aliases/<name>
+        - [x] aliases/\<name\>
             - [x] GET info
             - [x] PUT replace
             - [x] PATCH update
@@ -104,7 +104,7 @@ be found at [https://hexdocs.pm/lxd](https://hexdocs.pm/lxd).
 - [x] networks
     - [x] GET all
     - [x] POST create
-    - [x] networks/<name>
+    - [x] networks/\<name\>
         - [x] GET info
         - [x] PUT replace
         - [x] PATCH update
@@ -112,7 +112,7 @@ be found at [https://hexdocs.pm/lxd](https://hexdocs.pm/lxd).
         - [x] DELETE remove
 - [ ] operations
     - [x] GET all
-    - [ ] operations/<uuid>
+    - [ ] operations/\<uuid\>
         - [x] GET info
         - [x] DELETE remove
         - [x] wait
@@ -122,7 +122,7 @@ be found at [https://hexdocs.pm/lxd](https://hexdocs.pm/lxd).
 - [x] profiles
     - [x] GET all
     - [x] POST create
-    - [x] profiles/<name>
+    - [x] profiles/\<name\>
         - [x] GET info
         - [x] PUT replace
         - [x] PATCH update
@@ -131,7 +131,7 @@ be found at [https://hexdocs.pm/lxd](https://hexdocs.pm/lxd).
 - [ ] storage-pools
     - [x] GET all
     - [x] POST create
-    - [ ] storage-pools/<name>
+    - [ ] storage-pools/\<name\>
         - [x] GET info
         - [x] PUT replace
         - [x] PATCH update
@@ -139,7 +139,7 @@ be found at [https://hexdocs.pm/lxd](https://hexdocs.pm/lxd).
         - [x] volumes
             - [x] GET all
             - [x] POST create
-        - [ ] volumes/<type>/<name>
+        - [ ] volumes/\<type\>/\<name\>
             - [ ] GET
             - [ ] PUT
             - [ ] PATCH
