@@ -295,7 +295,7 @@ defmodule LXD.Container.Snapshot do
     end
   end
 
-  def delete(container_name, snapshot_name, opts \\ []) do
+  def remove(container_name, snapshot_name, opts \\ []) do
     url(container_name, snapshot_name)
     |> Client.delete
     |> Utils.handle_lxd_response(opts)
