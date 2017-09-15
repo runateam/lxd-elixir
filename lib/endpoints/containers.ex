@@ -243,3 +243,62 @@ defmodule LXD.Container.File do
   end
 
 end
+
+
+defmodule LXD.Container.Snapshot do
+  alias LXD.Client
+  alias LXD.Utils
+
+  defp url(container_name, snapshot_name \\ "") do
+    ["/containers/", container_name, "/snapshots", snapshot_name]
+    |> Path.join
+  end
+
+  def all(container_name, opts \\ []) do
+    url(container_name)
+    |> Client.get
+    |> Utils.handle_lxd_response(opts)
+  end
+
+  def create(container_name, snapshot_name, stateful \\ true, opts \\ []) do
+    %{
+      "name" => snapshot_name,
+      "stateful" => stateful
+    }
+    |> Poison.encode
+    |> case do
+      {:ok, json} ->
+        url(container_name)
+        |> Client.post(json)
+        |> Utils.handle_lxd_response(opts)
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  def get(container_name, snapshot_name, opts \\ []) do
+    url(container_name, snapshot_name)
+    |> Client.get
+    |> Utils.handle_lxd_response(opts)
+  end
+
+  def rename(container_name, snapshot_name, new_name, opts \\ []) do
+    %{ "name" => new_name }
+    |> Poison.encode
+    |> case do
+      {:ok, json} ->
+        url(container_name, snapshot_name)
+        |> Client.post(json)
+        |> Utils.handle_lxd_response(opts)
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  def delete(container_name, snapshot_name, opts \\ []) do
+    url(container_name, snapshot_name)
+    |> Client.delete
+    |> Utils.handle_lxd_response(opts)
+  end
+
+end
