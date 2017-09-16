@@ -1,8 +1,11 @@
 defmodule LXD.Client do
   require Logger
 
-  @version Application.get_env(:lxd, :api_version)
-  @url "http+unix://" <> URI.encode_www_form(Application.get_env(:lxd, :socket)) <> @version
+  @socket_default "/var/lib/lxd/unix.socket"
+  @version_default "/1.0"
+
+  @version Application.get_env(:lxd, :api_version, @version_default)
+  @url "http+unix://" <> URI.encode_www_form(Application.get_env(:lxd, :socket, @socket_default)) <> @version
   @http_opts [{:recv_timeout, :infinity}]
   @headers %{"Content-Type" => "application/json"}
 
