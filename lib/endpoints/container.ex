@@ -73,7 +73,7 @@ defmodule LXD.Container do
     response = state(name)
     case response do
       {:ok, body} ->
-        {:ok, body["metadata"]["status"] || nil}
+        {:ok, body["status"] || nil}
       _ ->
         response
     end
