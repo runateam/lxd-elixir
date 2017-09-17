@@ -26,18 +26,18 @@ defmodule LXD.Mixfile do
     [
       {:poison, "~> 3.1"},
       {:httpoison, "~> 0.13"},
-      {:websockex, "~> 0.4.0"}
+      {:websockex, "~> 0.4.0"},
+      {:ex_doc, "~> 0.16.4", only: :dev}
     ]
   end
 
   defp description do
-    " LXD API wrapper"
+    "LXD API wrapper"
   end
 
   defp package do
     [
       name: "lxd",
-      files: [],
       maintainers: ["Cédric Desgranges"],
       licenses: ["MIT"],
       links: %{"GitHub" => "https://github.com/PandaScore/lxd-elixir"},

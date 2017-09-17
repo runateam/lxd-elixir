@@ -1,24 +1,20 @@
 defmodule LXD.Utils do
 
+  def arg(args, key, default \\ nil) do
+    case List.keyfind(args, key, 0, nil) do
+      {_, value } -> value
+      _ -> default
+    end
+  end
+
   def handle_lxd_response(a, opts \\ [])
   def handle_lxd_response({:ok, headers, body}, opts) do
-    fct = arg(opts, :fct, fn({:ok, _h, b}) ->
-      case is_map(b) do
-        true ->
-          case Map.fetch(b, "metadata") do
-            {:ok, value} -> {:ok, value}
-            :error -> {:ok, b}
-          end
-        false ->
-          {:ok, b}
-      end
-    end)
+    fct = arg(opts, :fct, &default_apply_fct/1)
     wait = arg(opts, :wait, true)
     timeout = arg(opts, :timeout, 0)
 
     {:ok, headers, body}
     |> parse_body
-    |> IO.inspect
     |> wait_operation(wait, timeout)
     |> apply_fct(fct)
   end
@@ -35,6 +31,8 @@ defmodule LXD.Utils do
                 {:ok, headers, value}
               {:error, reason} ->
                 {:error, reason}
+              {:error, r1, r2} ->
+                {:error, {r1, r2}}
             end
           _ ->
             {:ok, headers, body}
@@ -72,10 +70,15 @@ defmodule LXD.Utils do
   defp wait_operation(o, _, _), do: o
 
 
-  def arg(args, key, default \\ nil) do
-    case List.keyfind(args, key, 0, nil) do
-      {_, value } -> value
-      _ -> default
+  def default_apply_fct({:ok, _headers, body}) do
+    case is_map(body) do
+      true ->
+        case Map.fetch(body, "metadata") do
+          {:ok, value} -> {:ok, value}
+          :error -> {:ok, body}
+        end
+      false ->
+        {:ok, body}
     end
   end
 
