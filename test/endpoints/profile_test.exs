@@ -2,7 +2,7 @@ defmodule ProfileTest do
   use ExUnit.Case, async: false
   alias LXD.Profile
 
-  @profile_name "elixir_test"
+  @profile_name "elixir-test"
   @profile_cfg %{
     "name" => @profile_name,
     "description" => "elixir test"
@@ -10,6 +10,7 @@ defmodule ProfileTest do
 
   setup context do
     if context[:create] do
+      Profile.remove(@profile_name)
       Profile.create(@profile_cfg)
     end
 
@@ -60,7 +61,7 @@ defmodule ProfileTest do
 
   @tag :create
   test "rename" do
-    new_name = @profile_name <> "_new"
+    new_name = @profile_name <> "-renamed"
     {:ok, _, %{"status_code" => status_code}} = Profile.rename(@profile_name, new_name)
     assert status_code == 200
     {:ok, _, %{"status_code" => status_code}} = Profile.remove(new_name)

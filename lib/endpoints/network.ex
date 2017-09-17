@@ -8,86 +8,38 @@ defmodule LXD.Network do
   end
 
   def all(opts \\ []) do
-    as_url = Utils.arg(opts, :as_url, false)
-
-    fct = fn {:ok, _headers, body} ->
-      ls = body["metadata"]
-      |> Enum.map(fn network ->
-        case as_url do
-          true -> network
-          false -> network |> Path.basename
-        end
-      end)
-      {:ok, ls}
-    end
-
     url()
-    |> Client.get
-    |> Utils.handle_lxd_response(opts ++ [{:fct, fct}])
+    |> Client.get(opts)
   end
 
   def create(configs, opts \\ []) do
-    configs
-    |> Poison.encode
-    |> case do
-      {:ok, json} ->
-        url()
-        |> Client.post(json)
-        |> Utils.handle_lxd_response(opts)
-      {:error, reason} ->
-        {:error, reason}
-    end
+    url()
+    |> Client.post(configs, opts)
   end
 
   def info(network_name, opts \\ []) do
     url(network_name)
-    |> Client.get
-    |> Utils.handle_lxd_response(opts)
+    |> Client.get(opts)
   end
 
   def replace(network_name, configs, opts \\ []) do
-    configs
-    |> Poison.encode
-    |> case do
-      {:ok, json} ->
-        url(network_name)
-        |> Client.put(json)
-        |> Utils.handle_lxd_response(opts)
-      {:error, reason} ->
-        {:error, reason}
-    end
+    url(network_name)
+    |> Client.put(configs, opts)
   end
 
   def update(network_name, configs, opts \\ []) do
-    configs
-    |> Poison.encode
-    |> case do
-      {:ok, json} ->
-        url(network_name)
-        |> Client.patch(json)
-        |> Utils.handle_lxd_response(opts)
-      {:error, reason} ->
-        {:error, reason}
-    end
+    url(network_name)
+    |> Client.patch(configs, opts)
   end
 
   def rename(network_name, new_name, opts \\ []) do
-    %{ "name" => new_name }
-    |> Poison.encode
-    |> case do
-      {:ok, json} ->
-        url(network_name)
-        |> Client.post(json)
-        |> Utils.handle_lxd_response(opts)
-      {:error, reason} ->
-        {:error, reason}
-    end
+    url(network_name)
+    |> Client.post(%{ "name" => new_name }, opts)
   end
 
   def remove(network_name, opts \\ []) do
     url(network_name)
-    |> Client.delete
-    |> Utils.handle_lxd_response(opts)
+    |> Client.delete(opts)
   end
 
 end
