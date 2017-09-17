@@ -3,66 +3,47 @@ defmodule LXD.Client do
 
   @socket_default "/var/lib/lxd/unix.socket"
   @version_default "/1.0"
+  @response_handler_default LXD.ResponseHandler
 
   @version Application.get_env(:lxd, :api_version, @version_default)
   @url "http+unix://" <> URI.encode_www_form(Application.get_env(:lxd, :socket, @socket_default)) <> @version
   @http_opts [{:recv_timeout, :infinity}]
   @headers %{"Content-Type" => "application/json"}
+  @response_handler Application.get_env(:lxd, :response_handler, @response_handler_default)
 
-  def get(endpoint, headers \\ @headers, opts \\ []) do
+  def get(endpoint, response_opts \\ [], headers \\ @headers, opts \\ []) do
     Logger.debug("[Client] GET #{endpoint}")
     @url <> endpoint
     |> HTTPoison.get(headers, @http_opts ++ opts)
-    |> handle_response
+    |> @response_handler.process(response_opts)
   end
 
-  def post(endpoint, data \\ "", headers \\ @headers, opts \\ []) do
+  def post(endpoint, data \\ "", response_opts \\ [], headers \\ @headers, opts \\ []) do
     Logger.debug("[Client] POST #{endpoint} #{data}")
     @url <> endpoint
     |> HTTPoison.post(data, headers, @http_opts ++ opts)
-    |> handle_response
+    |> @response_handler.process(response_opts)
   end
 
-  def delete(endpoint, headers \\ @headers, opts \\ []) do
+  def delete(endpoint, response_opts \\ [], headers \\ @headers, opts \\ []) do
     Logger.debug("[Client] DELETE #{endpoint}")
     @url <> endpoint
     |> HTTPoison.delete(headers, @http_opts ++ opts)
-    |> handle_response
+    |> @response_handler.process(response_opts)
   end
 
-  def put(endpoint, data \\ "", headers \\ @headers, opts \\ []) do
+  def put(endpoint, data \\ "", response_opts \\ [], headers \\ @headers, opts \\ []) do
     Logger.debug("[Client] PUT #{endpoint} #{data}")
     @url <> endpoint
     |> HTTPoison.put(data, headers, @http_opts ++ opts)
-    |> handle_response
+    |> @response_handler.process(response_opts)
   end
 
-  def patch(endpoint, data \\ "", headers \\ @headers, opts \\ []) do
+  def patch(endpoint, data \\ "", response_opts \\ [], headers \\ @headers, opts \\ []) do
     Logger.debug("[Client] PATCH #{endpoint} #{data}")
     @url <> endpoint
     |> HTTPoison.patch(data, headers, @http_opts ++ opts)
-    |> handle_response
-  end
-
-
-  defp handle_response({:ok, %HTTPoison.Response{status_code: code, body: body, headers: headers}}) do
-    Logger.debug("[Client] Request response with #{code}")
-    headers = headers
-    |> Enum.map(fn {key, value} ->
-      {key |> String.downcase, value}
-    end)
-    |> Map.new
-    {:ok, headers, body}
-  end
-
-  defp handle_response({:error, %HTTPoison.Error{id: _id, reason: reason}}) do
-    Logger.warn("[Client] Request failed with reason: #{reason}")
-    {:error, reason}
-  end
-
-  defp handle_response(_) do
-    Logger.warn("[Client] Request failed with reason: unknown")
-    {:error, :unknown}
+    |> @response_handler.process(response_opts)
   end
 
 end

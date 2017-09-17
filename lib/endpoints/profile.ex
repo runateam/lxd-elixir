@@ -1,60 +1,44 @@
 defmodule LXD.Profile do
   alias LXD.Client
-  alias LXD.Utils
+
+  defp url(profile_name \\ "") do
+    ["/profiles", profile_name]
+    |> Path.join
+  end
 
   def all(opts \\ []) do
-    as_url = Utils.arg(opts, :as_url, false)
-
-    fct = fn {:ok, _headers, body} ->
-      ls = body["metadata"]
-      |> Enum.map(fn profile ->
-        case as_url do
-          true -> profile
-          false -> profile |> Path.basename
-        end
-      end)
-      {:ok, ls}
-    end
-
-    "/profiles"
-    |> Client.get
-    |> Utils.handle_lxd_response(opts ++ [{:fct, fct}])
+    url()
+    |> Client.get(opts)
   end
 
-  def create(profile, opts \\ []) do
-    "/profiles"
-    |> Client.post(Poison.encode!(profile))
-    |> Utils.handle_lxd_response(opts)
+  def create(configs, opts \\ []) do
+    url()
+    |> Client.post(Poison.encode!(configs), opts)
   end
 
-  def info(name, opts \\ []) do
-    "/profiles/" <> name
-    |> Client.get
-    |> Utils.handle_lxd_response(opts)
+  def info(profile_name, opts \\ []) do
+    url(profile_name)
+    |> Client.get(opts)
   end
 
-  def replace(name, configs, opts \\ []) do
-    "/profiles/" <> name
-    |> Client.put(Poison.encode!(configs))
-    |> Utils.handle_lxd_response(opts)
+  def replace(profile_name, configs, opts \\ []) do
+    url(profile_name)
+    |> Client.put(Poison.encode!(configs), opts)
   end
 
-  def update(name, configs, opts \\ []) do
-    "/profiles/" <> name
-    |> Client.patch(Poison.encode!(configs))
-    |> Utils.handle_lxd_response(opts)
+  def update(profile_name, configs, opts \\ []) do
+    url(profile_name)
+    |> Client.patch(Poison.encode!(configs), opts)
   end
 
-  def rename(name, new_name, opts \\ []) do
-    "/profiles/" <> name
-    |> Client.post(Poison.encode!(%{"name" => new_name}))
-    |> Utils.handle_lxd_response(opts)
+  def rename(profile_name, new_name, opts \\ []) do
+    url(profile_name)
+    |> Client.post(Poison.encode!(%{"name" => new_name}), opts)
   end
 
-  def remove(name, opts \\ []) do
-    "/profiles/" <> name
-    |> Client.delete
-    |> Utils.handle_lxd_response(opts)
+  def remove(profile_name, opts \\ []) do
+    url(profile_name)
+    |> Client.delete(opts)
   end
 
 end
