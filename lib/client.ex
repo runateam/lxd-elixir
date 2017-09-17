@@ -11,38 +11,45 @@ defmodule LXD.Client do
   @headers %{"Content-Type" => "application/json"}
   @response_handler Application.get_env(:lxd, :response_handler, @response_handler_default)
 
-  def get(endpoint, response_opts \\ [], headers \\ @headers, opts \\ []) do
-    Logger.debug("[Client] GET #{endpoint}")
-    @url <> endpoint
-    |> HTTPoison.get(headers, @http_opts ++ opts)
-    |> @response_handler.process(response_opts)
+  def get(endpoint, response_opts \\ [], headers \\ [], opts \\ []) do
+    request(endpoint, :get, "", response_opts, headers, opts)
   end
 
-  def post(endpoint, data \\ "", response_opts \\ [], headers \\ @headers, opts \\ []) do
-    Logger.debug("[Client] POST #{endpoint} #{data}")
-    @url <> endpoint
-    |> HTTPoison.post(data, headers, @http_opts ++ opts)
-    |> @response_handler.process(response_opts)
+  def delete(endpoint, response_opts \\ [], headers \\ [], opts \\ []) do
+    request(endpoint, :delete, "", response_opts, headers, opts)
   end
 
-  def delete(endpoint, response_opts \\ [], headers \\ @headers, opts \\ []) do
-    Logger.debug("[Client] DELETE #{endpoint}")
-    @url <> endpoint
-    |> HTTPoison.delete(headers, @http_opts ++ opts)
-    |> @response_handler.process(response_opts)
+  def post(endpoint, body \\ "", response_opts \\ [], headers \\ [], opts \\ []) do
+    request(endpoint, :post, body, response_opts, headers, opts)
   end
 
-  def put(endpoint, data \\ "", response_opts \\ [], headers \\ @headers, opts \\ []) do
-    Logger.debug("[Client] PUT #{endpoint} #{data}")
-    @url <> endpoint
-    |> HTTPoison.put(data, headers, @http_opts ++ opts)
-    |> @response_handler.process(response_opts)
+  def put(endpoint, body \\ "", response_opts \\ [], headers \\ [], opts \\ []) do
+    request(endpoint, :put, body, response_opts, headers, opts)
   end
 
-  def patch(endpoint, data \\ "", response_opts \\ [], headers \\ @headers, opts \\ []) do
-    Logger.debug("[Client] PATCH #{endpoint} #{data}")
-    @url <> endpoint
-    |> HTTPoison.patch(data, headers, @http_opts ++ opts)
+  def patch(endpoint, body \\ "", response_opts \\ [], headers \\ [], opts \\ []) do
+    request(endpoint, :patch, body, response_opts, headers, opts)
+  end
+
+  defp request(endpoint, method, body \\ "", response_opts \\ [], headers \\ [], opts \\ [])
+
+  defp request(endpoint, method, body, response_opts, headers, opts) when is_map(body) do
+    case Poison.encode(body) do
+      {:ok, json} ->
+        request(endpoint, method, json, response_opts, headers, opts)
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  defp request(endpoint, method, body, response_opts, headers, opts) when is_binary(body) do
+    HTTPoison.request(
+      method,
+      @url <> endpoint,
+      body,
+      headers ++ @headers,
+      opts ++ @http_opts
+    )
     |> @response_handler.process(response_opts)
   end
 

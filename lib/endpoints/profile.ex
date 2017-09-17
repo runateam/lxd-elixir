@@ -13,7 +13,7 @@ defmodule LXD.Profile do
 
   def create(configs, opts \\ []) do
     url()
-    |> Client.post(Poison.encode!(configs), opts)
+    |> Client.post(configs, opts)
   end
 
   def info(profile_name, opts \\ []) do
@@ -23,17 +23,17 @@ defmodule LXD.Profile do
 
   def replace(profile_name, configs, opts \\ []) do
     url(profile_name)
-    |> Client.put(Poison.encode!(configs), opts)
+    |> Client.put(configs, opts)
   end
 
   def update(profile_name, configs, opts \\ []) do
     url(profile_name)
-    |> Client.patch(Poison.encode!(configs), opts)
+    |> Client.patch(configs, opts)
   end
 
   def rename(profile_name, new_name, opts \\ []) do
     url(profile_name)
-    |> Client.post(Poison.encode!(%{"name" => new_name}), opts)
+    |> Client.post(%{"name" => new_name}, opts)
   end
 
   def remove(profile_name, opts \\ []) do
