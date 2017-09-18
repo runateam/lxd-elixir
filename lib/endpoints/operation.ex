@@ -2,22 +2,25 @@ defmodule LXD.Operation do
   alias LXD.Client
   alias LXD.Utils
 
+  def url(operation_uuid \\ "", opts \\ []) do
+    wait = if(opts[:wait], do: "/wait", else: "")
+    ["/operations", operation_uuid, wait]
+    |> Path.join
+  end
+
   def all(opts \\ []) do
-    "/operations"
-    |> Client.get
-    |> Utils.handle_lxd_response(opts)
+    url()
+    |> Client.get(opts)
   end
 
   def info(uuid, opts \\ []) do
-    "/operations/" <> uuid
-    |> Client.get
-    |> Utils.handle_lxd_response(opts)
+    url(uuid)
+    |> Client.get(opts)
   end
 
   def remove(uuid, opts \\ []) do
-    "/operations/" <> uuid
-    |> Client.delete
-    |> Utils.handle_lxd_response(opts)
+    url(uuid)
+    |> Client.delete(opts)
   end
 
   def wait(uuid, opts \\ []) do
@@ -25,12 +28,11 @@ defmodule LXD.Operation do
     uuid = uuid |> String.split("/") |> List.last
 
     timeout = case timeout do
-      0 -> ""
-      _ -> "?timeout=#{timeout}"
+      0 -> []
+      _ -> [{"timeout", timeout}]
     end
 
-    "/operations/" <> uuid <> "/wait" <> timeout
-    |> Client.get
-    |> Utils.handle_lxd_response(opts)
+    url(uuid, wait: true)
+    |> Client.get(opts, [], params: timeout)
   end
 end

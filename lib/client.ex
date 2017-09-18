@@ -1,5 +1,4 @@
 defmodule LXD.Client do
-  require Logger
 
   @socket_default "/var/lib/lxd/unix.socket"
   @version_default "/1.0"
