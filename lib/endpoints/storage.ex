@@ -1,85 +1,59 @@
 defmodule LXD.Storage do
   alias LXD.Client
-  alias LXD.Utils
+
+  defp url(storage_name \\ "") do
+    ["/storage-pools", storage_name]
+    |> Path.join
+  end
 
   def all(opts \\ []) do
-    as_url = Utils.arg(opts, :as_url, false)
-
-    fct = fn {:ok, _headers, body} ->
-      ls = body["metadata"]
-      |> Enum.map(fn storage ->
-        case as_url do
-          true -> storage
-          false -> storage |> Path.basename
-        end
-      end)
-      {:ok, ls}
-    end
-
-    "/storage-pools"
-    |> Client.get
-    |> Utils.handle_lxd_response(opts ++ [{:fct, fct}])
+    url()
+    |> Client.get(opts)
   end
 
   def create(configs, opts \\ []) do
-    "/storage-pools"
-    |> Client.post(Poison.encode!(configs))
-    |> Utils.handle_lxd_response(opts)
+    url()
+    |> Client.post(configs, opts)
   end
 
-  def info(name, opts \\ []) do
-    "/storage-pools/" <> name
-    |> Client.get
-    |> Utils.handle_lxd_response(opts)
+  def info(storage_name, opts \\ []) do
+    url(storage_name)
+    |> Client.get(opts)
   end
 
-  def replace(name, configs, opts \\ []) do
-    "/storage-pools/" <> name
-    |> Client.put(Poison.encode!(configs))
-    |> Utils.handle_lxd_response(opts)
+  def replace(storage_name, configs, opts \\ []) do
+    url(storage_name)
+    |> Client.put(configs, opts)
   end
 
-  def update(name, configs, opts \\ []) do
-    "/storage-pools/" <> name
-    |> Client.patch(Poison.encode!(configs))
-    |> Utils.handle_lxd_response(opts)
+  def update(storage_name, configs, opts \\ []) do
+    url(storage_name)
+    |> Client.patch(configs, opts)
   end
 
-  def remove(name, opts \\ []) do
-    "/storage-pools/" <> name
-    |> Client.delete
-    |> Utils.handle_lxd_response(opts)
+  def remove(storage_name, opts \\ []) do
+    url(storage_name)
+    |> Client.delete(opts)
   end
 
 end
 
 defmodule LXD.Storage.Volume do
   alias LXD.Client
-  alias LXD.Utils
+
+  defp url(storage_name) do
+    ["/storage-pools", storage_name, "/volumes"]
+    |> Path.join
+  end
 
   def all(storage_name, opts \\ []) do
-    as_url = Utils.arg(opts, :as_url, false)
-
-    fct = fn {:ok, _headers, body} ->
-      ls = body["metadata"]
-      |> Enum.map(fn volume ->
-        case as_url do
-          true -> volume
-          false -> volume |> Path.basename
-        end
-      end)
-      {:ok, ls}
-    end
-
-    "/storage-pools/" <> storage_name <> "/volumes"
-    |> Client.get
-    |> Utils.handle_lxd_response(opts ++ [{:fct, fct}])
+    url(storage_name)
+    |> Client.get(opts)
   end
 
   def create(storage_name, configs, opts \\ []) do
-    "/storage-pools/" <> storage_name <> "/volumes"
-    |> Client.post(Poison.encode!(configs))
-    |> Utils.handle_lxd_response(opts)
+    url(storage_name)
+    |> Client.post(configs, opts)
   end
 
 end

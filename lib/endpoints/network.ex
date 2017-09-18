@@ -1,6 +1,5 @@
 defmodule LXD.Network do
   alias LXD.Client
-  alias LXD.Utils
 
   defp url(network_name \\ "") do
     ["/networks", network_name]
