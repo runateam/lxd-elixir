@@ -3,7 +3,7 @@ defmodule LXD.ResponseHandler do
 
   def process(response, opts \\ [])
 
-  def process({:ok, %HTTPoison.Response{status_code: code, body: body, headers: headers}}, opts) do
+  def process({:ok, %HTTPoison.Response{body: body, headers: headers}}, opts) do
     wait = Utils.arg(opts, :wait, true)
     timeout = Utils.arg(opts, :timeout, 0)
 
