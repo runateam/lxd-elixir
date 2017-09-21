@@ -7,7 +7,7 @@ defmodule LXD.Client do
   @version Application.get_env(:lxd, :api_version, @version_default)
   @url "http+unix://" <> URI.encode_www_form(Application.get_env(:lxd, :socket, @socket_default)) <> @version
   @http_opts [{:recv_timeout, :infinity}]
-  @headers %{"Content-Type" => "application/json"}
+  @headers [{"Content-Type", "application/json"}]
   @response_handler Application.get_env(:lxd, :response_handler, @response_handler_default)
 
   def get(endpoint, response_opts \\ [], headers \\ [], opts \\ []) do
