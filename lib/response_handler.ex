@@ -1,4 +1,5 @@
 defmodule LXD.ResponseHandler do
+  @moduledoc false
   alias LXD.Utils
 
   def process(response, opts \\ [])

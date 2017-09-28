@@ -10,51 +10,97 @@ defmodule LXD.Container do
     |> Path.join
   end
 
+  @doc """
+  List all containers
+  """
   def all(opts \\ []) do
     url()
     |> Client.get(opts)
   end
 
+  @doc """
+  Create a new container
+
+  `configs` is a map that define how to create the container
+
+  See official documention for more details [here](https://github.com/lxc/lxd/blob/master/doc/rest-api.md#post-1)
+  """
   def create(configs, opts \\ []) do
     url()
     |> Client.post(configs, opts)
   end
 
+  @doc """
+  Container information
+  """
   def info(container_name, opts \\ []) do
     url(container_name)
     |> Client.get(opts)
   end
 
+  @doc """
+  Replace container configuration
+  """
   def replace(container_name, configs, opts \\ []) do
     url(container_name)
     |> Client.put(configs, opts)
   end
 
+  @doc """
+  Update container configuration
+  """
   def update(container_name, configs, opts \\ []) do
     url(container_name)
     |> Client.patch(configs, opts)
   end
 
+  @doc """
+  Rename the container
+  """
   def rename(container_name, new_name, opts \\ []) do
     url(container_name)
     |> Client.post(%{"name" => new_name}, opts)
   end
 
+  @doc """
+  Remove the container
+  """
   def remove(container_name, opts \\ []) do
     url(container_name)
     |> Client.delete(opts)
   end
 
+  @doc """
+  Run a remote command
+
+  Does not support websocket
+
+  Only tested with this kind of input
+  ```
+  %{
+    "command" => ["my", "cmd"],
+    "environment" => %{"key" => "value"}
+  }
+  ```
+
+  See official documention for more details [here](https://github.com/lxc/lxd/blob/master/doc/rest-api.md#10containersnameexec)
+  """
   def exec(container_name, configs, opts \\ []) do
     url(container_name, exec: true)
     |> Client.post(configs, opts)
   end
 
+  @doc """
+  State of the container
+  """
   def state(container_name, opts \\ []) do
     url(container_name, state: true)
     |> Client.get(opts)
   end
 
+  @doc """
+  Status of the container as a string
+  """
   def status(name) do
     response = state(name)
     case response do
@@ -65,6 +111,9 @@ defmodule LXD.Container do
     end
   end
 
+  @doc """
+  Stop the container
+  """
   def stop(container_name, opts \\ []) do
     state_change("stop", container_name, opts)
   end

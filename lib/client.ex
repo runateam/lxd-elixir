@@ -1,4 +1,5 @@
 defmodule LXD.Client do
+  @moduledoc false
 
   @socket_default "/var/lib/lxd/unix.socket"
   @version_default "/1.0"
@@ -10,29 +11,48 @@ defmodule LXD.Client do
   @headers [{"Content-Type", "application/json"}]
   @response_handler Application.get_env(:lxd, :response_handler, @response_handler_default)
 
+  @doc """
+  GET request to the given endpoint
+  """
   def get(endpoint, response_opts \\ [], headers \\ [], opts \\ []) do
     request(endpoint, :get, "", response_opts, headers, opts)
   end
 
+  @doc """
+  DELETE request to the given endpoint
+  """
   def delete(endpoint, response_opts \\ [], headers \\ [], opts \\ []) do
     request(endpoint, :delete, "", response_opts, headers, opts)
   end
 
+  @doc """
+  POST request to the given endpoint
+  """
   def post(endpoint, body \\ "", response_opts \\ [], headers \\ [], opts \\ []) do
     request(endpoint, :post, body, response_opts, headers, opts)
   end
 
+  @doc """
+  PUT request to the given endpoint
+  """
   def put(endpoint, body \\ "", response_opts \\ [], headers \\ [], opts \\ []) do
     request(endpoint, :put, body, response_opts, headers, opts)
   end
 
+  @doc """
+  PATCH request to the given endpoint
+  """
   def patch(endpoint, body \\ "", response_opts \\ [], headers \\ [], opts \\ []) do
     request(endpoint, :patch, body, response_opts, headers, opts)
   end
 
+
+  # Request to the given endpoint with the given HTTP method
+  # If body is a map, it will be convert to a string with Poison
   defp request(endpoint, method, body \\ "", response_opts \\ [], headers \\ [], opts \\ [])
 
-  defp request(endpoint, method, body, response_opts, headers, opts) when is_map(body) do
+  defp request(endpoint, method, body, response_opts, headers, opts)
+  when is_map(body) do
     case Poison.encode(body) do
       {:ok, json} ->
         request(endpoint, method, json, response_opts, headers, opts)
@@ -41,7 +61,8 @@ defmodule LXD.Client do
     end
   end
 
-  defp request(endpoint, method, body, response_opts, headers, opts) when is_binary(body) do
+  defp request(endpoint, method, body, response_opts, headers, opts)
+  when is_binary(body) do
     HTTPoison.request(
       method,
       @url <> endpoint,
