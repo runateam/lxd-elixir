@@ -73,16 +73,15 @@ defmodule LXD.Container do
   @doc """
   Run a remote command
 
-  - command: must be a list splitted by space (see official documentation)
-  - envs: map of environement variables to set
+  - `command`: must be a list splitted by space (see official documentation)
+  - `envs`: map of environement variables to set
 
   Record output is set to true
-  Return {:ok, return_code, stdout, stderr} if success
-  Return {:error, reason} if error
-  If stdout or stderr can't be read, :error is set instead
-  
+  Return `{:ok, return_code, stdout, stderr}` if success
+  Return `{:error, reason}` if error
+  If stdout or stderr can't be read, `:error` is set instead
+
   Does not support websocket
-  ```
 
   See official documention for more details [here](https://github.com/lxc/lxd/blob/master/doc/rest-api.md#10containersnameexec)
   """
