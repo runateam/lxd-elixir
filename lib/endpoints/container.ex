@@ -73,21 +73,52 @@ defmodule LXD.Container do
   @doc """
   Run a remote command
 
-  Does not support websocket
+  - command: must be a list splitted by space (see official documentation)
+  - envs: map of environement variables to set
 
-  Only tested with this kind of input
-  ```
-  %{
-    "command" => ["my", "cmd"],
-    "environment" => %{"key" => "value"}
-  }
+  Record output is set to true
+  Return {:ok, return_code, stdout, stderr} if success
+  Return {:error, reason} if error
+  If stdout or stderr can't be read, :error is set instead
+  
+  Does not support websocket
   ```
 
   See official documention for more details [here](https://github.com/lxc/lxd/blob/master/doc/rest-api.md#10containersnameexec)
   """
-  def exec(container_name, configs, opts \\ []) do
+  def exec(container_name, command, envs \\ %{}, opts \\ []) do
+    configs = %{
+      "command" => command,
+      "environement" => envs,
+      "record-output" => true
+    }
     url(container_name, exec: true)
     |> Client.post(configs, opts)
+    |> case do
+      {:ok, _headers, %{"status_code" => 200, "metadata" => %{"metadata" => %{"output" => %{"1" => stdout, "2" => stderr}, "return" => return}}}} ->
+        stdout = stdout |> Path.basename
+        stderr = stderr |> Path.basename
+
+        stdout = case LXD.Container.Log.get(container_name, stdout) do
+          {:ok, _header, body} when is_binary(body) ->
+            body
+          _ ->
+            :error
+        end
+
+        stderr = case LXD.Container.Log.get(container_name, stderr) do
+          {:ok, _header, body} when is_binary(body) ->
+            body
+          _ ->
+            :error
+        end
+
+        {:ok, return, stdout, stderr}
+      {:ok, _headers, body} ->
+        {:error, body}
+      {:error, reason} ->
+        {:error, reason}
+    end
   end
 
   @doc """
