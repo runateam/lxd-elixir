@@ -26,7 +26,7 @@ defmodule LXD.Mixfile do
     [
       {:poison, "~> 3.1"},
       {:httpoison, "~> 0.13"},
-      {:websockex, "~> 0.4.0"},
+      # {:websockex, "~> 0.4.0"},
       {:ex_doc, "~> 0.16.4", only: :dev}
     ]
   end
