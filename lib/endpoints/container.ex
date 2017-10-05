@@ -88,7 +88,7 @@ defmodule LXD.Container do
   def exec(container_name, command, envs \\ %{}, opts \\ []) do
     configs = %{
       "command" => command,
-      "environement" => envs,
+      "environment" => envs,
       "record-output" => true
     }
     url(container_name, exec: true)
