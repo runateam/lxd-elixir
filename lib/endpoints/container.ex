@@ -250,10 +250,8 @@ defmodule LXD.Container.File do
           "file" ->
             filename = Regex.run(~r/filename=(.+)/, headers["content-disposition"], capture: :all_but_first) |> List.first
             filename = [dir, filename] |> Path.join
-
-            File.open(filename, [:write], fn(file) ->
-              IO.write(file, body)
-            end)
+            
+            File.write(filename, body)
 
             {:ok, filename}
           "directory" ->
