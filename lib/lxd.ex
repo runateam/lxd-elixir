@@ -1,4 +1,5 @@
 defmodule LXD do
+  alias LXD.Client
 
   @moduledoc """
 
@@ -14,8 +15,16 @@ defmodule LXD do
   :lxd, :api_version, "1.0"
   ```
 
-
-
   """
+
+  def versions(opts \\ [append_version: false]) do
+    ""
+    |> Client.get(opts)
+  end
+
+  def version(version, opts \\ [append_version: false]) do
+    version
+    |> Client.get(opts)
+  end
 
 end

@@ -1,12 +1,13 @@
 defmodule LXD.Client do
   @moduledoc false
+  alias LXD.Utils
 
   @socket_default "/var/lib/lxd/unix.socket"
   @version_default "/1.0"
   @response_handler_default LXD.ResponseHandler
 
   @version Application.get_env(:lxd, :api_version, @version_default)
-  @url "http+unix://" <> Path.join([URI.encode_www_form(Application.get_env(:lxd, :socket, @socket_default)), @version])
+  @url "http+unix://" <> URI.encode_www_form(Application.get_env(:lxd, :socket, @socket_default))
   @http_opts [{:recv_timeout, :infinity}]
   @headers [{"Content-Type", "application/json"}]
   @response_handler Application.get_env(:lxd, :response_handler, @response_handler_default)
@@ -63,9 +64,14 @@ defmodule LXD.Client do
 
   defp request(endpoint, method, body, response_opts, headers, opts)
   when is_binary(body) do
+    version = case Utils.arg(response_opts, :append_version, true) do
+      true -> @version
+      false -> ""
+    end
+
     HTTPoison.request(
       method,
-      @url <> endpoint,
+      [@url, version, endpoint] |> Path.join,
       body,
       headers ++ @headers,
       opts ++ @http_opts
