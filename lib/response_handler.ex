@@ -7,14 +7,20 @@ defmodule LXD.ResponseHandler do
   def process({:ok, %HTTPoison.Response{body: body, headers: headers}}, opts) do
     wait = Utils.arg(opts, :wait, true)
     timeout = Utils.arg(opts, :timeout, 0)
+    raw = Utils.arg(opts, :raw, false)
 
-    case headers |> Map.new |> Map.fetch("Content-Type") do
-      {:ok, "application/json"} ->
-        process_json_body(body, wait, timeout)
-      {:ok, _} ->
-        {:ok, body}
-      {:error} ->
-        {:ok, body}
+    case raw do
+      true ->
+        {:ok, headers, body}
+      false ->
+        case headers |> Map.new |> Map.fetch("Content-Type") do
+          {:ok, "application/json"} ->
+            process_json_body(body, wait, timeout)
+          {:ok, _} ->
+            {:ok, body}
+          {:error} ->
+            {:ok, body}
+        end
     end
   end
 
