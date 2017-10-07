@@ -8,15 +8,14 @@ defmodule LXD.ResponseHandler do
     wait = Utils.arg(opts, :wait, true)
     timeout = Utils.arg(opts, :timeout, 0)
 
-    headers = headers
-    |> Enum.map(fn {key, value} ->
-      {key |> String.downcase, value}
-    end)
-    |> Map.new
-
-    {:ok, headers, body}
-    |> parse_body
-    |> wait_operation(wait, timeout)
+    case headers |> Map.new |> Map.fetch("Content-Type") do
+      {:ok, "application/json"} ->
+        process_json_body(body, wait, timeout)
+      {:ok, _} ->
+        {:ok, body}
+      {:error} ->
+        {:ok, body}
+    end
   end
 
   def process({:error, %HTTPoison.Error{id: _id, reason: reason}}, _opts) do
@@ -28,24 +27,35 @@ defmodule LXD.ResponseHandler do
   end
 
 
-  defp parse_body({:ok, %{"content-type" => "application/json"} = headers, body}) do
-    case Poison.decode(body) do
-      {:ok, value} ->
-        {:ok, headers, value}
+  defp process_json_body(body, wait, timeout) do
+    with  {:ok, body} <- Poison.decode(body)
+    do
+      body |> handle_json_body(wait, timeout)
+    else
       {:error, reason} ->
         {:error, reason}
-      {:error, r1, r2} ->
-        {:error, {r1, r2}}
+      error ->
+        {:error, error}
     end
   end
 
-  defp parse_body({:ok, _header, _body} = o), do: o
 
+  defp handle_json_body(body, wait \\ true, timeout \\ nil)
 
-  defp wait_operation(a, wait \\ true, timeout \\ nil)
-  defp wait_operation({:ok, _headers, %{"type" => "async", "operation" => operation}}, wait, timeout) when wait == true and byte_size(operation) > 0 do
+  defp handle_json_body(%{"type" => "error", "error" => error}, _, _) do
+    {:error, error}
+  end
+
+  defp handle_json_body(%{"type" => "sync", "metadata" => metadata}, _, _) do
+    {:ok, metadata}
+  end
+
+  defp handle_json_body(%{"type" => "async", "operation" => operation}, true, timeout) do
     LXD.Operation.wait(operation, timeout: timeout)
   end
-  defp wait_operation(o, _wait, _timeout), do: o
+
+  defp handle_json_body(%{"type" => "async", "metadata" => metadata}, _, _) do
+    {:ok, metadata}
+  end
 
 end

@@ -35,6 +35,7 @@ I am new to Elixir and LXD, so your help and advices are more than welcome on th
 
 Here a few things I have in mind to work on:
 - Implement missing endpoints (you can find the list of the coverage status for all LXD endpoints down below).
+- Found a way to test everything without doing any damage to the host running the test (maybe by using a LXD/docker container with LXD installed on it)
 - Add better coverage for tests.
 - Found a generic format for the retuning value of each call, I am really not satisfied of what I have done so far.
 
