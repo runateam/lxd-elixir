@@ -9,7 +9,8 @@ defmodule LXD.Mixfile do
       start_permanent: Mix.env == :prod,
       deps: deps(),
       package: package(),
-      description: description()
+      description: description(),
+      docs: docs()
     ]
   end
 
@@ -44,4 +45,12 @@ defmodule LXD.Mixfile do
       source_url: "https://github.com/PandaScore/lxd-elixir"
     ]
   end
+
+  defp docs do
+    [
+      main: "LXD",
+      extras: ["README.md"]
+    ]
+  end
+
 end

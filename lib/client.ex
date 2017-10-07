@@ -6,7 +6,7 @@ defmodule LXD.Client do
   @response_handler_default LXD.ResponseHandler
 
   @version Application.get_env(:lxd, :api_version, @version_default)
-  @url "http+unix://" <> URI.encode_www_form(Application.get_env(:lxd, :socket, @socket_default)) <> @version
+  @url "http+unix://" <> Path.join([URI.encode_www_form(Application.get_env(:lxd, :socket, @socket_default)), @version])
   @http_opts [{:recv_timeout, :infinity}]
   @headers [{"Content-Type", "application/json"}]
   @response_handler Application.get_env(:lxd, :response_handler, @response_handler_default)

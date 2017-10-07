@@ -1,23 +1,51 @@
 # LXD Elixir
 
-**TODO: Add description**
+[![Hex.pm](https://img.shields.io/hexpm/v/lxd.svg?style=flat-square)](https://hex.pm/packages/lxd)
+[![Hex Docs](https://img.shields.io/badge/hex-docs-9768d1.svg?style=flat-square)](https://hexdocs.pm/lxd)
+
+## Documentation
+
+Documentation is available on Hexdocs [HERE](https://hexdocs.pm/lxd)
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `lxd` to your list of dependencies in `mix.exs`:
+The package can be installed by adding `lxd` to your list of dependencies
+in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:lxd, "~> 0.1.0"}
+    {:lxd, "~> 0.1.5"}
   ]
 end
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/lxd](https://hexdocs.pm/lxd).
+## Usage
+
+TODO
+
+
+## Contributing
+
+This version of the project is very early. I have implemented what I needed for my projects using LXD containers and now working on it when I have some time.
+
+
+I am new to Elixir and LXD, so your help and advices are more than welcome on this project.
+
+
+Here a few things I have in mind to work on:
+- Implement missing endpoints (you can find the list of the coverage status for all LXD endpoints down below).
+- Add better coverage for tests.
+- Found a generic format for the retuning value of each call, I am really not satisfied of what I have done so far.
+
+
+## How to contribute
+
+1. Fork it
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create new Pull Request
 
 ## LXD API coverage
 
