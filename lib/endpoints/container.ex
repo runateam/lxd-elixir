@@ -18,7 +18,7 @@ defmodule LXD.Container do
     |> Client.get(opts)
     |> case do
       {:ok, containers} ->
-        containers |> Enum.map(&Path.basename/1)
+        {:ok, containers |> Enum.map(&Path.basename/1)}
       other ->
         other
     end
@@ -100,7 +100,7 @@ defmodule LXD.Container do
     url(container_name, exec: true)
     |> Client.post(configs, opts)
     |> case do
-      {:ok, %{"metadata" => %{"output" => %{"1" => stdout, "2" => stderr}, "return" => return}}} ->
+      {:ok, %{"output" => %{"1" => stdout, "2" => stderr}, "return" => return}} ->
         get_result = fn log_name ->
           case LXD.Container.Log.get(container_name, log_name |> Path.basename) do
             {:ok, body} when is_binary(body) ->
@@ -226,7 +226,7 @@ defmodule LXD.Container.Log do
     |> Client.get(opts)
     |> case do
       {:ok, data} ->
-        data |> Enum.map(&Path.basename/1)
+        {:ok, data |> Enum.map(&Path.basename/1)}
       others ->
         others
     end

@@ -51,7 +51,16 @@ defmodule LXD.ResponseHandler do
   end
 
   defp handle_json_body(%{"type" => "sync", "metadata" => metadata}, _, _) do
-    {:ok, metadata}
+    case metadata do
+      %{"status_code" => 200, "metadata" => data} when is_nil(data)->
+        :ok
+      %{"status_code" => 200, "metadata" => data} ->
+        {:ok, data}
+      %{"err" => error} ->
+        {:error, error}
+      other ->
+        {:ok, other}
+    end
   end
 
   defp handle_json_body(%{"type" => "async", "operation" => operation}, true, timeout) do
