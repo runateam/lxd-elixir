@@ -5,7 +5,7 @@ defmodule LXD.Mixfile do
     [
       app: :lxd,
       version: "0.1.5",
-      elixir: "~> 1.5",
+      elixir: "~> 1.6",
       start_permanent: Mix.env == :prod,
       deps: deps(),
       package: package(),
@@ -27,7 +27,6 @@ defmodule LXD.Mixfile do
     [
       {:poison, "~> 3.1"},
       {:httpoison, "~> 0.13"},
-      # {:websockex, "~> 0.4.0"},
       {:ex_doc, "~> 0.16.4", only: :dev}
     ]
   end

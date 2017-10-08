@@ -9,6 +9,12 @@ defmodule LXD.Image do
   def all(opts \\ []) do
     url()
     |> Client.get(opts)
+    |> case do
+      {:ok, images} ->
+        images |> Enum.map(&Path.basename/1)
+      other ->
+        other
+    end
   end
 
 end
@@ -55,6 +61,12 @@ defmodule LXD.Image.Alias do
   def all(opts \\ []) do
     url()
     |> Client.get(opts)
+    |> case do
+      {:ok, images} ->
+        images |> Enum.map(&Path.basename/1)
+      other ->
+        other
+    end
   end
 
   def create(alias_name, target, description \\ "", opts \\ []) do
