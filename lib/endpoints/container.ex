@@ -16,6 +16,12 @@ defmodule LXD.Container do
   def all(opts \\ []) do
     url()
     |> Client.get(opts)
+    |> case do
+      {:ok, containers} ->
+        containers |> Enum.map(&Path.basename/1)
+      other ->
+        other
+    end
   end
 
   @doc """
@@ -94,27 +100,18 @@ defmodule LXD.Container do
     url(container_name, exec: true)
     |> Client.post(configs, opts)
     |> case do
-      {:ok, _headers, %{"status_code" => 200, "metadata" => %{"metadata" => %{"output" => %{"1" => stdout, "2" => stderr}, "return" => return}}}} ->
-        stdout = stdout |> Path.basename
-        stderr = stderr |> Path.basename
-
-        stdout = case LXD.Container.Log.get(container_name, stdout) do
-          {:ok, _header, body} when is_binary(body) ->
-            body
-          _ ->
-            :error
+      {:ok, %{"metadata" => %{"output" => %{"1" => stdout, "2" => stderr}, "return" => return}}} ->
+        get_result = fn log_name ->
+          case LXD.Container.Log.get(container_name, log_name |> Path.basename) do
+            {:ok, body} when is_binary(body) ->
+              body
+            _ ->
+              :error
+          end
         end
-
-        stderr = case LXD.Container.Log.get(container_name, stderr) do
-          {:ok, _header, body} when is_binary(body) ->
-            body
-          _ ->
-            :error
-        end
-
-        {:ok, return, stdout, stderr}
-      {:ok, _headers, body} ->
-        {:error, body}
+        {:ok, return, get_result.(stdout), get_result.(stderr)}
+      {:ok, _body} ->
+        {:error, "Cannot find output logs"}
       {:error, reason} ->
         {:error, reason}
     end
@@ -132,12 +129,11 @@ defmodule LXD.Container do
   Status of the container as a string
   """
   def status(name) do
-    response = state(name)
-    case response do
-      {:ok, _header, body} ->
-        {:ok, body["metadata"]["status"] || nil}
-      _ ->
-        response
+    case state(name) do
+      {:ok, %{"status" => value}} ->
+        {:ok, value}
+      other ->
+        other
     end
   end
 
@@ -178,6 +174,14 @@ defmodule LXD.Container do
 
     url(container_name, state: true)
     |> Client.put(input, opts)
+    |> case do
+      {:ok, %{"status_code" => 200}} ->
+        :ok
+      {:ok, %{"err" => error}} ->
+        {:error, error}
+      other ->
+        other
+    end
   end
 
   def metadata(container_name, opts \\ []) do
@@ -220,6 +224,12 @@ defmodule LXD.Container.Log do
   def all(container_name, opts \\ []) do
     url(container_name)
     |> Client.get(opts)
+    |> case do
+      {:ok, data} ->
+        data |> Enum.map(&Path.basename/1)
+      others ->
+        others
+    end
   end
 
   def get(container_name, log_name, opts \\ []) do
@@ -240,69 +250,98 @@ defmodule LXD.Container.File do
   end
 
   def get(container_name, path_in_container, opts \\ []) do
-    dir = Utils.arg(opts, :dir, System.cwd)
+    url(container_name)
+    |> Client.get(opts, [], params: [{"path", path_in_container}])
+  end
 
+  def get_and_write(container_name, path_in_container, target_path, opts \\ []) do
     url(container_name)
     |> Client.get(opts, [], params: [{"path", path_in_container}])
     |> case do
-      {:ok, headers, body} ->
-        case headers["x-lxd-type"] do
-          "file" ->
-            filename = Regex.run(~r/filename=(.+)/, headers["content-disposition"], capture: :all_but_first) |> List.first
-            filename = [dir, filename] |> Path.join
-            
-            File.write(filename, body)
-
-            {:ok, filename}
-          "directory" ->
-            dirname = path_in_container |> Path.basename
-            dirname = [dir, dirname] |> Path.join
-
-            case File.mkdir(dirname) do
-              :ok ->
-                body["metadata"]
-                |> Enum.each(fn one ->
-                  get(container_name, [path_in_container, one] |> Path.join, dir: dirname)
-                end)
-              {:error, posix} ->
-                {:error, posix}
-            end
-            dirname
+      {:ok, ls} when is_list(ls) ->
+        case File.mkdir(target_path) do
+          :ok ->
+            ls |> Enum.each(fn one ->
+              get_and_write(
+                container_name,
+                [path_in_container, one] |> Path.join,
+                [target_path, one] |> Path.join,
+                opts
+              )
+            end)
+          {:error, posix} ->
+            {:error, "Cannot create directory #{target_path} (reason: #{:file.format_error(posix)})"}
         end
-      {:error, reason} ->
-        {:error, reason}
+      {:ok, file_content} when is_binary(file_content) ->
+        case File.write(target_path, file_content) do
+          :ok ->
+            :ok
+          {:error, posix} ->
+            {:error, "Cannot write in file #{target_path} (reason: #{:file.format_error(posix)})"}
+        end
+      other ->
+        other
     end
   end
 
-  def put(container_name, path_file, path_in_container, opts \\ []) do
+  defp put(container_name, path_in_container, type, content, opts) do
     append = Utils.arg(opts, :append, false)
 
+    headers = [{"x-lxd-type", type}]
+    headers = [{"x-lxd-write", if(append, do: "append", else: "overwrite")} | headers ]
+
+    url(container_name)
+    |> Client.post(content, opts, headers, params: [{"path", path_in_container}])
+    |> case do
+      {:ok, _} ->
+        :ok
+      others ->
+        others
+    end
+  end
+
+  def put_file(container_name, path_in_container, content, opts \\ []) do
+    put(container_name, path_in_container, "file", content, opts)
+  end
+
+  def create_dir(container_name, path_in_container, opts \\ []) do
+    put(container_name, path_in_container, "directory", "", opts)
+  end
+
+  def read_and_put(container_name, path_file, path_in_container, opts \\ []) do
     case File.exists?(path_file) do
       true ->
-        {type, data} = case File.dir?(path_file) do
+        case File.dir?(path_file) do
           true ->
-            {"directory", ""}
+            create_dir(container_name, path_in_container, opts)
+            case File.ls(path_file) do
+              {:ok, ls} ->
+                ls |> Enum.reduce(:ok, fn(file, acc) ->
+                  case acc do
+                    :ok ->
+                      read_and_put(
+                        container_name,
+                        [path_file, file] |> Path.join,
+                        [path_in_container, file] |> Path.join,
+                        opts
+                      )
+                    other ->
+                      other
+                  end
+                end)
+              {:error, reason} ->
+                {:error, "Failed to list files in #{path_file} (reason: #{reason})"}
+            end
           false ->
             case File.read(path_file) do
               {:ok, binary} ->
-                {"file", binary}
+                put_file(container_name, path_in_container, binary)
               {:error, posix} ->
                 {:error, "Failed to read file #{path_file} (#{:file.format_error(posix)})"}
             end
         end
-
-        case type do
-          :error ->
-            {:error, data}
-          _ ->
-            headers = [{"x-lxd-type", type}]
-            headers = [{"x-lxd-write", if(append, do: "append", else: "overwrite")} | headers ]
-
-            url(container_name)
-            |> Client.post(data, opts, headers, params: [{"path", path_in_container}])
-        end
       false ->
-        {:error, "File doesn't exist"}
+        {:error, "File #{path_file} doesn't exist"}
     end
   end
 

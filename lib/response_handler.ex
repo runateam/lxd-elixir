@@ -13,12 +13,10 @@ defmodule LXD.ResponseHandler do
       true ->
         {:ok, headers, body}
       false ->
-        case headers |> Map.new |> Map.fetch("Content-Type") do
-          {:ok, "application/json"} ->
+        case headers |> Map.new do
+          %{"Content-Type" => "application/json"} ->
             process_json_body(body, wait, timeout)
-          {:ok, _} ->
-            {:ok, body}
-          {:error} ->
+          _ ->
             {:ok, body}
         end
     end
