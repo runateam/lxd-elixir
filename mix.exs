@@ -26,7 +26,7 @@ defmodule LXD.Mixfile do
   defp deps do
     [
       {:poison, "~> 3.1"},
-      {:httpoison, "~> 1.0.0"},
+      {:httpoison, "~> 1.0"},
       {:ex_doc, "~> 0.16.4", only: :dev}
     ]
   end

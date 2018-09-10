@@ -24,6 +24,41 @@ end
 
 TODO
 
+## Configuration
+`:remote` - Set it to `true` if you want to connect with remote LXD API.
+
+`:url` - LXD API URL - works only with `remote: true`
+
+`:socket` - LXD API socket location only with `remote: false` (default)
+
+`:api_version` - LXD API Version with leading slash, default '/1.0'
+
+`:http_opts` - [HTTPoison](https://hexdocs.pm/httpoison/HTTPoison.html#request/5) as described in documentation.
+
+Example:
+```elixir
+config :lxd,
+       socket: "/var/lib/lxd/unix.socket",
+       http_opts: [
+         recv_timeout: :infinity
+       ]
+```
+
+Advanced example with `:hackney` options:
+```elixir
+config :lxd,
+       remote: true,
+       url: "https://lxd.dev:8443",
+       http_opts: [
+         hackney: [
+           ssl_options: [
+             certfile: "priv/certs/lxd-dev.crt",
+             keyfile: "priv/certs/lxd-dev.key"
+           ]
+         ]
+       ]
+```
+
 
 ## Contributing
 
